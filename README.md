@@ -4,28 +4,35 @@ A simplified blockchain implementation in Golang (Jeiwan ver.)
 ### Try it Out
 
 ```bash
-❯ go run .
-Mining the block containing "Genesis Block"
-00000b24d04b24281f0d8616dc1e992a7ba7558bec998a171e8e511282e7b70c
+❯ alias blockchain_go="go run ."
 
+❯ blockchain_go
+Usage:
+  addblock -data BLOCK_DATA - add a block to the blockchain
+  printchain - print all the blocks of the blockchain
+
+exit status 1
+
+❯ blockchain_go printchain
+Prev. hash: 
+Data: Genesis Block
+Hash: 00000f21a0214565f0d194483e1e38410e170a93f2d0a2a9f43317323724fed9
+PoW: true
+
+❯ blockchain_go addblock -data "Send 1 BTC to Ivan"
 Mining the block containing "Send 1 BTC to Ivan"
-00000b4781887f105726db8b2ec8bc439829b0d4aa92fd0cc2543fcd90ee3c97
+0000049f6a9d32b039fb39a011a71643ddb38997ff65aba79a1338ba6d633176
 
-Mining the block containing "Send 2 more BTC to Ivan"
-000005bbd5072ef46bfc89a50824b1e9390e10f55754935ba314b87169fdb3d2
+Success!
+
+❯ blockchain_go printchain
+Prev. hash: 00000f21a0214565f0d194483e1e38410e170a93f2d0a2a9f43317323724fed9
+Data: Send 1 BTC to Ivan
+Hash: 0000049f6a9d32b039fb39a011a71643ddb38997ff65aba79a1338ba6d633176
+PoW: true
 
 Prev. hash: 
 Data: Genesis Block
-Hash: 00000b24d04b24281f0d8616dc1e992a7ba7558bec998a171e8e511282e7b70c
-PoW: true
-
-Prev. hash: 00000b24d04b24281f0d8616dc1e992a7ba7558bec998a171e8e511282e7b70c
-Data: Send 1 BTC to Ivan
-Hash: 00000b4781887f105726db8b2ec8bc439829b0d4aa92fd0cc2543fcd90ee3c97
-PoW: true
-
-Prev. hash: 00000b4781887f105726db8b2ec8bc439829b0d4aa92fd0cc2543fcd90ee3c97
-Data: Send 2 more BTC to Ivan
-Hash: 000005bbd5072ef46bfc89a50824b1e9390e10f55754935ba314b87169fdb3d2
+Hash: 00000f21a0214565f0d194483e1e38410e170a93f2d0a2a9f43317323724fed9
 PoW: true
 ```
