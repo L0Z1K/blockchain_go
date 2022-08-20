@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/boltdb/bolt"
@@ -21,6 +22,11 @@ type Blockchain struct {
 func (bc *Blockchain) MineBlock(transactions []*Transaction) {
 	var lastHash []byte
 
+	for _, tx := range transactions {
+		if !bc.VerifyTransaction(tx) {
+			log.Fatal("ERROR: Invalid transaction")
+		}
+	}
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
 		lastHash = b.Get([]byte("l"))
