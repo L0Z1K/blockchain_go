@@ -15,11 +15,11 @@ func (cli *CLI) createBlockchain(address string) {
 	fmt.Println("Done!")
 }
 
-func (cli *CLI) getBalance(address, nodeID string) {
+func (cli *CLI) getBalance(address string) {
 	if !ValidateAddress(address) {
 		log.Panic("ERROR: Address is not valid")
 	}
-	bc := NewBlockchain(nodeID)
+	bc := NewBlockchain()
 	defer bc.db.Close()
 
 	balance := 0
@@ -34,7 +34,7 @@ func (cli *CLI) getBalance(address, nodeID string) {
 	fmt.Printf("Balance of '%s': %d\n", address, balance)
 }
 
-func (cli *CLI) send(from, to string, amount int, nodeID string) {
+func (cli *CLI) send(from, to string, amount int) {
 	if !ValidateAddress(from) {
 		log.Panic("ERROR: Sender address is not valid")
 	}
@@ -42,23 +42,18 @@ func (cli *CLI) send(from, to string, amount int, nodeID string) {
 		log.Panic("ERROR: Recipient address is not valid")
 	}
 
-	bc := NewBlockchain(nodeID)
+	bc := NewBlockchain()
 	defer bc.db.Close()
 
-	wallets, err := NewWallets(nodeID)
-	if err != nil {
-		log.Panic(err)
-	}
-	wallet := wallets.GetWallet(from)
-	tx := NewUTXOTransaction(&wallet, to, amount, bc)
+	tx := NewUTXOTransaction(from, to, amount, bc)
 	bc.MineBlock([]*Transaction{tx})
 	fmt.Println("Success!")
 }
 
-func (cli *CLI) createWallet(nodeID string) {
-	wallets, _ := NewWallets(nodeID)
+func (cli *CLI) createWallet() {
+	wallets, _ := NewWallets()
 	address := wallets.CreateWallet()
-	wallets.SaveToFile(nodeID)
+	wallets.SaveToFile()
 
 	fmt.Printf("Your new address: %s\n", address)
 }
@@ -80,12 +75,6 @@ func (cli *CLI) validateArgs() {
 
 func (cli *CLI) Run() {
 	cli.validateArgs()
-
-	nodeID := os.Getenv("NODE_ID")
-	if nodeID == "" {
-		fmt.Printf("NODE_ID env. var is not set!")
-		os.Exit(1)
-	}
 
 	getBalanceCmd := flag.NewFlagSet("getbalance", flag.ExitOnError)
 	sendCmd := flag.NewFlagSet("send", flag.ExitOnError)
@@ -128,7 +117,7 @@ func (cli *CLI) Run() {
 			getBalanceCmd.Usage()
 			os.Exit(1)
 		}
-		cli.getBalance(*getBalanceAddress, nodeID)
+		cli.getBalance(*getBalanceAddress)
 	}
 
 	if createBlockchainCmd.Parsed() {
@@ -144,11 +133,11 @@ func (cli *CLI) Run() {
 			sendCmd.Usage()
 			os.Exit(1)
 		}
-		cli.send(*sendFrom, *sendTo, *sendAmount, nodeID)
+		cli.send(*sendFrom, *sendTo, *sendAmount)
 	}
 
 	if createWalletCmd.Parsed() {
-		cli.createWallet(nodeID)
+		cli.createWallet()
 	}
 
 }

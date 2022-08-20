@@ -79,10 +79,15 @@ func NewCoinbaseTX(to, data string) *Transaction {
 // 	return out.ScriptPubKey == unlockingData
 // }
 
-func NewUTXOTransaction(wallet *Wallet, to string, amount int, bc *Blockchain) *Transaction {
+func NewUTXOTransaction(from, to string, amount int, bc *Blockchain) *Transaction {
 	var inputs []TXInput
 	var outputs []TXOutput
 
+	wallets, err := NewWallets()
+	if err != nil {
+		log.Panic(err)
+	}
+	wallet := wallets.GetWallet(from)
 	pubKeyHash := HashPubKey(wallet.PublicKey)
 	acc, validOutputs := bc.FindSpendableOutputs(pubKeyHash, amount)
 
@@ -98,18 +103,14 @@ func NewUTXOTransaction(wallet *Wallet, to string, amount int, bc *Blockchain) *
 		}
 
 		for _, out := range outs {
-			input := TXInput{txID, out, nil, pubKeyHash}
+			input := TXInput{txID, out, nil, wallet.PublicKey}
 			inputs = append(inputs, input)
 		}
 	}
 
-	pubKeyHash_to := Base58Decode([]byte(to))
-	pubKeyHash_to = pubKeyHash_to[1 : len(pubKeyHash_to)-addressChecksumLen]
-
-	// Make Vout of Transaction
-	outputs = append(outputs, TXOutput{amount, pubKeyHash_to})
+	outputs = append(outputs, *NewTXOutput(amount, to))
 	if acc > amount {
-		outputs = append(outputs, TXOutput{acc - amount, pubKeyHash})
+		outputs = append(outputs, *NewTXOutput(acc-amount, from))
 	}
 
 	tx := Transaction{nil, inputs, outputs}
